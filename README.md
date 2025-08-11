@@ -17,6 +17,10 @@ The events are offered free of charge through the [Hack The Box Ambassador Progr
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/F1F81F15T3)
 
+## HTB Resources
+ * [0xdf hacks stuff](https://0xdf.gitlab.io/tags#hackthebox)
+ * [IppSec](https://ippsec.rocks/)
+
 ## Past Meetups
 
 | Meetup | Slides | Sponsor | Machine | Topics |
