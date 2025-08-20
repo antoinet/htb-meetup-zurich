@@ -20,6 +20,10 @@ The events are offered free of charge through the [Hack The Box Ambassador Progr
 ## HTB Resources
  * [0xdf hacks stuff](https://0xdf.gitlab.io/tags#hackthebox)
  * [IppSec](https://ippsec.rocks/)
+ * [AD Security](https://adsecurity.org)
+ * [NetExec](https://www.netexec.wiki/)
+ * [Impacket](https://github.com/fortra/impacket)
+ * [Bloodhound](https://github.com/SpecterOps/BloodHound)
 
 ## Past Meetups
 
