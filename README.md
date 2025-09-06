@@ -21,6 +21,7 @@ The events are offered free of charge through the [Hack The Box Ambassador Progr
  * [0xdf hacks stuff](https://0xdf.gitlab.io/tags#hackthebox)
  * [IppSec](https://ippsec.rocks/)
  * [AD Security](https://adsecurity.org)
+ * [Taming the Three-Headed Dog - Kerberos Deep Dive](https://www.youtube.com/playlist?list=PLyphfaqpz_mmCmFtVQxAu3jnE4lXPy3lL)
  * [NetExec](https://www.netexec.wiki/)
  * [Impacket](https://github.com/fortra/impacket)
  * [Bloodhound](https://github.com/SpecterOps/BloodHound)
