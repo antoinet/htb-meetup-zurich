@@ -24,14 +24,14 @@ def create_response(status_code, data=None):
     return response
 
 
-def create_issue(email, issue):
+def create_issue(email, request):
     headers = {
         "Content-Type": "application/json",
         "X-Automation-Webhook-Token": webhook_secret
     }
     data = {
         "email": email,
-        "issue": issue
+        "request": request
     }
     requests.post(webhook_url, headers=headers, json=data)
 
