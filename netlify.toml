@@ -1,13 +1,2 @@
 [build]
   functions = "netlify/functions"
-
-[functions]
-  python_runtime = "3.10"
-
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
-
-[build.environment]
-  PYTHON_VERSION = "3.10"
