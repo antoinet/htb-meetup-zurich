@@ -1,1 +1,33 @@
+# Dependencies
+node_modules/
+
+# Netlify
+.netlify/
+
+# Environment variables
 .env
+.env.local
+.env.*.local
+
+# Build output
+dist/
+.cache/
+
+# TypeScript
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
