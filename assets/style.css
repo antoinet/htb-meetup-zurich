@@ -1,0 +1,129 @@
+/* === Base === */
+body {
+  background-color: #0d0d0d;
+  color: #f0f0f0;
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+}
+
+header, footer {
+  text-align: center;
+  padding: 1.5rem;
+}
+
+a {
+  color: #9fef00;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+a:hover {
+  color: #9fef00;
+  text-decoration: underline;
+}
+
+nav {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  background-color: #111;
+  padding: 1rem;
+  border-bottom: 1px solid #222;
+}
+
+.container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+/* === Tables === */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+  border: 1px solid #222;
+  background-color: #141414;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+th, td {
+  padding: 0.9rem 1rem;
+  text-align: left;
+}
+
+th {
+  background-color: #1c1c1c;
+  color: #9fef00;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.85rem;
+  border-bottom: 1px solid #222;
+}
+
+tr:nth-child(even) {
+  background-color: #101010;
+}
+
+tr:hover {
+  background-color: #1b1b1b;
+}
+
+td {
+  border-bottom: 1px solid #222;
+}
+
+/* === Responsive Tables === */
+@media (max-width: 600px) {
+  table, thead, tbody, th, td, tr {
+    display: block;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tr {
+    margin-bottom: 1rem;
+    border: 1px solid #222;
+    border-radius: 8px;
+    padding: 0.5rem;
+  }
+
+  td {
+    padding: 0.5rem;
+    text-align: right;
+    position: relative;
+  }
+
+  td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 1rem;
+    color: #32ff84;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+  }
+}
+
+/* === Footer === */
+footer {
+  font-size: 0.9rem;
+  color: #888;
+  border-top: 1px solid #222;
+  margin-top: 2rem;
+  padding: 1rem;
+}
+
+/* === Utility classes === */
+.text-center {
+  text-align: center;
+}
+
+.mt-2 {
+  margin-top: 2rem;
+}
