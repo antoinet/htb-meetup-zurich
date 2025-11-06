@@ -37,7 +37,7 @@ export default async (req: Request, context: Context) => {
     }
 
     return new Response(
-        JSON.stringify({ message: "Request submitted" }), 
+        JSON.stringify({ message: "Success" }), 
         { status: 200, headers: { "Content-Type": "application/json"} }
     );
 }
