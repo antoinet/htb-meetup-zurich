@@ -1,0 +1,1 @@
+import * as bootstrap from './___netlify-bootstrap.mjs';export const handler = bootstrap.getLambdaHandler('./request-webhook.mjs')

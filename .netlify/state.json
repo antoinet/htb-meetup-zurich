@@ -1,0 +1,21 @@
+{
+	"siteId": "5935aca7-9c79-4d0b-9883-68bacf26798c",
+	"geolocation": {
+		"data": {
+			"city": "Horgen",
+			"country": {
+				"code": "CH",
+				"name": "Switzerland"
+			},
+			"subdivision": {
+				"code": "ZH",
+				"name": "Zurich"
+			},
+			"timezone": "Europe/Zurich",
+			"latitude": 47.2576,
+			"longitude": 8.6119,
+			"postalCode": "8810"
+		},
+		"timestamp": 1762381768197
+	}
+}
