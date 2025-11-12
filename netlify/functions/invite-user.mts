@@ -47,6 +47,14 @@ export default async (req: Request, context: Context) => {
         );
     }
 
+    const api_token = req.headers.get("x-api-key");
+    if (api_token !== Netlify.env.get("X_API_TOKEN")) {
+        return new Response(
+            JSON.stringify({ error: "Unauthorized" }),
+            { status: 401, headers: { "Content-Type": "application/json" } }
+        );
+    }
+
     try {
         const payload = await req.json();
         console.log(`Sending invitation for ${payload.email}`);
