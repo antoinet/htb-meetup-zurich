@@ -65,8 +65,10 @@ export default async (req: Request, context: Context) => {
         );
     }
 
-    const api_token = req.headers.get("x-api-key");
-    if (api_token !== Netlify.env.get("X_API_TOKEN")) {
+    const api_key = req.headers.get("x-api-key");
+    console.log("x-api-key:", api_key);
+    console.log("expected:", Netlify.env.get("X_API_KEY"));
+    if (api_key !== Netlify.env.get("X_API_KEY")) {
         return new Response(
             JSON.stringify({ error: "Unauthorized" }),
             { status: 401, headers: { "Content-Type": "application/json" } }
