@@ -41,14 +41,16 @@ async function inviteUser(email: string) {
 
 export default async (req: Request, context: Context) => {
     if (req.method !== "POST") {
+        console.error("Method not allowed");
         return new Response(
             JSON.stringify({ error: "Method not allowed" }),
             { status: 405, headers: { "Content-Type": "application/json" } }
         );
     }
 
-    const api_key = req.headers.get("x-api-key");
-    if (api_key !== Netlify.env.get("X_API_KEY")) {
+    const my_secret = req.headers.get("x-my-secret");
+    if (my_secret !== Netlify.env.get("MY_SECRET")) {
+        console.error("Missing or wrong x-my-secret header value");
         return new Response(
             JSON.stringify({ error: "Unauthorized" }),
             { status: 401, headers: { "Content-Type": "application/json" } }
@@ -57,8 +59,12 @@ export default async (req: Request, context: Context) => {
 
     try {
         const payload = await req.json();
-        console.log(`Sending invitation for ${payload.email}`);
         await inviteUser(payload.email);
+        console.log(`Sent invitation for ${payload.email}`);
+        return new Response(
+            JSON.stringify({ message: "Success" }), 
+            { status: 200, headers: { "Content-Type": "application/json"} }
+        );
     } catch (error) {
         console.error("Error processing request:", error);
         return new Response(
@@ -69,9 +75,4 @@ export default async (req: Request, context: Context) => {
             { status: 500, headers: { "Content-Type": "application/json" } }
         );
     }
-
-    return new Response(
-        JSON.stringify({ message: "Success" }), 
-        { status: 200, headers: { "Content-Type": "application/json"} }
-    );
 }

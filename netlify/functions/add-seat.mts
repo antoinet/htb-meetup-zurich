@@ -59,16 +59,16 @@ export default async (req: Request, context: Context) => {
     const htb_session = Netlify.env.get("HTB_SESSION");
 
     if (req.method !== "POST") {
+        console.error("Method not allowed");
         return new Response(
             JSON.stringify({ error: "Method not allowed" }),
             { status: 405, headers: { "Content-Type": "application/json" } }
         );
     }
 
-    const api_key = req.headers.get("x-api-key");
-    console.log("x-api-key:", api_key);
-    console.log("expected:", Netlify.env.get("X_API_KEY"));
-    if (api_key !== Netlify.env.get("X_API_KEY")) {
+    const my_secret = req.headers.get("x-my-secret");
+    if (my_secret !== Netlify.env.get("MY_SECRET")) {
+        console.error("Missing or wrong x-my-secret header value");
         return new Response(
             JSON.stringify({ error: "Unauthorized" }),
             { status: 401, headers: { "Content-Type": "application/json" } }
@@ -78,8 +78,12 @@ export default async (req: Request, context: Context) => {
     try {
         const payload = await req.json();
         const userid = await findUser(payload.email);
-        console.log(`Adding seat for ${payload.email} (userid: ${userid})`);
         await addSeat(userid);
+        console.log(`Added seat for ${payload.email} (userid: ${userid})`);
+        return new Response(
+            JSON.stringify({ message: "Success" }), 
+            { status: 200, headers: { "Content-Type": "application/json"} }
+        );
     } catch (error) {
         console.error("Error processing request:", error);
         return new Response(
@@ -90,9 +94,4 @@ export default async (req: Request, context: Context) => {
             { status: 500, headers: { "Content-Type": "application/json" } }
         );
     }
-
-    return new Response(
-        JSON.stringify({ message: "Success" }), 
-        { status: 200, headers: { "Content-Type": "application/json"} }
-    );
 }
