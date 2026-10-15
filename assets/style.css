@@ -314,36 +314,6 @@ footer {
   margin-top: 2rem;
 }
 /* === Onboarding === */
-.steps {
-  counter-reset: step;
-  list-style: none;
-  padding: 0;
-  margin: 0 0 2rem;
-}
-
-.steps li {
-  counter-increment: step;
-  position: relative;
-  padding-left: 2.75rem;
-  margin-bottom: 1.25rem;
-}
-
-.steps li::before {
-  content: counter(step);
-  position: absolute;
-  left: 0;
-  top: 0.1rem;
-  width: 1.8rem;
-  height: 1.8rem;
-  border-radius: 4px;
-  background: #9fef00;
-  color: #0d0d0d;
-  font-family: 'Courier New', monospace;
-  font-weight: bold;
-  text-align: center;
-  line-height: 1.8rem;
-}
-
 .onboarding-form {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(159, 239, 0, 0.2);
