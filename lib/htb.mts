@@ -4,7 +4,8 @@
  *
  *   - existing user  -> assign the meetup license (expires after `days`)
  *   - unknown email  -> create a registration code (carries the license, expires after `days`)
- *   - unknown email that already has an unused code -> nothing to do (invitation already sent)
+ *   - unknown email that already has an unused code -> report it, or with `resend`
+ *     delete that code and create a fresh one (the API has no "resend" endpoint)
  */
 
 const DEFAULT_BASE_URL = "https://enterprise.hackthebox.com/api/ext/v1";
@@ -32,8 +33,8 @@ interface Paginated<T> {
 
 export type ProvisionResult =
   | { action: "license_assigned"; userId: number; expiresAt: string }
-  | { action: "registration_code_sent"; codeId: number; validUntil: string }
-  | { action: "registration_code_pending" };
+  | { action: "invitation_sent"; codeId: number; validUntil: string; replacedCodeId?: number }
+  | { action: "invitation_pending"; codeId?: number; validUntil?: string };
 
 export interface HtbConfig {
   token: string;
@@ -56,14 +57,14 @@ export class HtbApiError extends Error {
 }
 
 type Api = <T>(
-  method: "GET" | "POST",
+  method: "GET" | "POST" | "DELETE",
   pathOrUrl: string,
   opts?: { query?: Record<string, string | number>; body?: unknown },
 ) => Promise<T>;
 
 function makeClient(token: string, baseUrl: string): Api {
   return async function api<T>(
-    method: "GET" | "POST",
+    method: "GET" | "POST" | "DELETE",
     pathOrUrl: string,
     opts: { query?: Record<string, string | number>; body?: unknown } = {},
   ): Promise<T> {
@@ -122,13 +123,28 @@ async function findUserByEmail(api: Api, email: string): Promise<HtbUser | undef
   return undefined;
 }
 
+/** Unused registration code for this email, if any. */
+async function findActiveRegistrationCode(
+  api: Api,
+  email: string,
+): Promise<RegistrationCode | undefined> {
+  for await (const c of paginate<RegistrationCode>(api, "/registration_codes", { active: 1 })) {
+    if (norm(c.email) === norm(email)) return c;
+  }
+  return undefined;
+}
+
 function isActiveCodeConflict(err: unknown): boolean {
   if (!(err instanceof HtbApiError) || err.status !== 422) return false;
   const body = err.body as { errors?: { email?: string[] } } | undefined;
   return !!body?.errors?.email?.some((m) => /active registration code/i.test(m));
 }
 
-export async function provision(email: string, cfg: HtbConfig): Promise<ProvisionResult> {
+export async function provision(
+  email: string,
+  cfg: HtbConfig,
+  opts: { resend?: boolean } = {},
+): Promise<ProvisionResult> {
   const api = makeClient(cfg.token, cfg.baseUrl ?? DEFAULT_BASE_URL);
   const user = await findUserByEmail(api, email);
 
@@ -141,13 +157,28 @@ export async function provision(email: string, cfg: HtbConfig): Promise<Provisio
     return { action: "license_assigned", userId: user.id, expiresAt: data.expires_at };
   }
 
-  try {
-    const { data } = await api<{ data: RegistrationCode }>("POST", "/registration_codes", {
+  // Resend: delete the unused code first, otherwise creating a new one fails with 422.
+  // If creating then fails, the next submission simply creates a fresh code.
+  let replacedCodeId: number | undefined;
+  if (opts.resend) {
+    const existing = await findActiveRegistrationCode(api, email);
+    if (existing) {
+      await api("DELETE", `/registration_codes/${existing.id}`);
+      replacedCodeId = existing.id;
+    }
+  }
+
+  const createCode = () =>
+    api<{ data: RegistrationCode }>("POST", "/registration_codes", {
       body: { email, role: cfg.role ?? "Guest", duration: cfg.days, license: cfg.licenseId },
     });
-    return { action: "registration_code_sent", codeId: data.id, validUntil: data.valid_until };
+
+  try {
+    const { data } = await createCode();
+    return { action: "invitation_sent", codeId: data.id, validUntil: data.valid_until, replacedCodeId };
   } catch (err) {
-    if (isActiveCodeConflict(err)) return { action: "registration_code_pending" };
-    throw err;
+    if (!isActiveCodeConflict(err)) throw err;
+    const pending = await findActiveRegistrationCode(api, email);
+    return { action: "invitation_pending", codeId: pending?.id, validUntil: pending?.valid_until };
   }
 }

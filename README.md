@@ -3,16 +3,21 @@
 One Netlify Function, `POST https://htbzh.netlify.app/api/onboard`, is called by the form on
 [htbzh.ch/onboarding.html](https://htbzh.ch/onboarding.html) (served from the `gh-pages` branch).
 
-Every request needs the **meetup code** that's announced at the meetup. If the code is valid:
+Every request needs the **meetup code** that's announced at the meetup. If the code is valid,
+the response says what happened:
 
-| Who | What happens |
-|---|---|
-| Existing member of the HTB Enterprise org | The Meetup Lab license is assigned and expires after `HTB_DURATION_DAYS` |
-| Unknown email | A registration code (invitation email) is sent that already carries the license, with the same duration |
-| Unknown email that already has an unused invitation | Nothing new is sent |
+| Who | What happens | `status` |
+|---|---|---|
+| Existing member of the HTB Enterprise org | The Meetup Lab license is assigned and expires after `HTB_DURATION_DAYS` | `license_assigned` |
+| Unknown email | A registration code (invitation email) is sent that already carries the license, with the same duration | `invitation_sent` |
+| Unknown email that already has an unused invitation | Nothing is sent. The page offers **Send a new invitation** | `invitation_pending` |
+| Same, with `"resend": true` | The unused code is deleted and a new one is created, which sends a fresh email | `invitation_sent` |
 
-The page shows the same message in all three cases, so it never reveals who is a member.
-The code is checked before anything is looked up on Hack The Box.
+The HTB API has no resend endpoint, so resending deletes the unused code and creates a new one.
+If creating fails after the delete, the next submission just creates a fresh code.
+
+The code is checked before anything is looked up on Hack The Box, so without it nobody can
+trigger emails. Accepted trade-off: anyone who knows the code can tell members from non-members.
 
 Other protections: a hidden honeypot field, a CORS allow-list, and a Netlify rate limit of
 about 10 submissions per minute per IP.
