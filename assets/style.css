@@ -344,14 +344,6 @@ footer {
   line-height: 1.8rem;
 }
 
-.steps img {
-  display: block;
-  max-width: 100%;
-  margin-top: 0.75rem;
-  border: 1px solid #222;
-  border-radius: 6px;
-}
-
 .onboarding-form {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(159, 239, 0, 0.2);
@@ -443,6 +435,22 @@ footer {
 .form-status.ok {
   background: rgba(159, 239, 0, 0.08);
   border-color: #9fef00;
+}
+
+.form-status.info {
+  background: rgba(114, 164, 242, 0.08);
+  border-color: #72a4f2;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #9fef00;
+  border: 1px solid #9fef00;
+  margin-top: 1rem;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: rgba(159, 239, 0, 0.1);
 }
 
 .form-status.error {

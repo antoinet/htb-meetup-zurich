@@ -46,6 +46,7 @@
 
       <button type="submit" class="btn">Get access</button>
       <div class="form-status" id="form-status" role="status" aria-live="polite"></div>
+      <button type="button" class="btn btn-secondary" id="resend" hidden>Send a new invitation</button>
     </form>
 
     <h3>What happens next</h3>
@@ -54,10 +55,6 @@
         create your account. The Meetup Lab is included.</li>
       <li><b>Joined before?</b> Sign in to <a href="https://enterprise.hackthebox.com" target="_blank" rel="noopener">enterprise.hackthebox.com</a>
         with your existing account. The Meetup Lab has been added to it.</li>
-      <li>Open the Meetup Lab. It has the violet icon in the left navigation pane.
-        <img src="https://storage.tally.so/3c794ac7-76cc-438e-81c9-5c7a7bcc50e3/meetup_lab.png"
-             alt="Left navigation pane of the Hack The Box Enterprise platform, with the violet Meetup Lab icon" loading="lazy">
-      </li>
     </ol>
     <p>Access lasts a few days after the meetup. Something not working? Grab the organiser.</p>
   </div>
@@ -70,15 +67,21 @@
     (function () {
       var form = document.getElementById("onboarding-form");
       var status = document.getElementById("form-status");
-      var button = form.querySelector("button");
+      var submitBtn = form.querySelector("button[type=submit]");
+      var resendBtn = document.getElementById("resend");
 
       function show(kind, text) {
         status.className = "form-status " + kind;
         status.textContent = text;
       }
 
-      form.addEventListener("submit", function (e) {
-        e.preventDefault();
+      function setBusy(busy) {
+        submitBtn.disabled = busy;
+        resendBtn.disabled = busy;
+        submitBtn.textContent = busy ? "Sending…" : "Get access";
+      }
+
+      function send(resend) {
         var email = form.email.value.trim();
         var code = form.code.value.trim();
 
@@ -93,14 +96,14 @@
           return;
         }
 
-        button.disabled = true;
-        button.textContent = "Sending…";
+        setBusy(true);
+        resendBtn.hidden = true;
         show("", "");
 
         fetch(form.dataset.endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: email, code: code, website: form.website.value })
+          body: JSON.stringify({ email: email, code: code, resend: resend, website: form.website.value })
         })
           .then(function (res) {
             if (res.status === 429) {
@@ -111,16 +114,28 @@
             });
           })
           .then(function (data) {
-            show(data.ok ? "ok" : "error", data.message);
-            if (data.ok) form.reset();
+            var pending = data.ok && data.status === "invitation_pending";
+            show(data.ok ? (pending ? "info" : "ok") : "error", data.message);
+            resendBtn.hidden = !pending;
           })
           .catch(function () {
             show("error", "Couldn't reach the server. Check your connection and try again.");
           })
           .finally(function () {
-            button.disabled = false;
-            button.textContent = "Get access";
+            setBusy(false);
           });
+      }
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        send(false);
+      });
+      resendBtn.addEventListener("click", function () {
+        send(true);
+      });
+      // A different email makes the resend offer stale.
+      form.email.addEventListener("input", function () {
+        resendBtn.hidden = true;
       });
     })();
   </script>
