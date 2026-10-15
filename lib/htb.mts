@@ -33,6 +33,7 @@ interface Paginated<T> {
 
 export type ProvisionResult =
   | { action: "license_assigned"; userId: number; expiresAt: string }
+  | { action: "license_active"; userId: number }
   | { action: "invitation_sent"; codeId: number; validUntil: string; replacedCodeId?: number }
   | { action: "invitation_pending"; codeId?: number; validUntil?: string };
 
@@ -134,6 +135,15 @@ async function findActiveRegistrationCode(
   return undefined;
 }
 
+/** 422 "User is already associated with this license." (observed in production). */
+function isLicenseAlreadyAssigned(err: unknown): boolean {
+  if (!(err instanceof HtbApiError) || err.status !== 422) return false;
+  const body = err.body as { message?: string; errors?: { user?: string[] } } | undefined;
+  return [body?.message ?? "", ...(body?.errors?.user ?? [])].some((m) =>
+    /already associated with this license/i.test(m),
+  );
+}
+
 function isActiveCodeConflict(err: unknown): boolean {
   if (!(err instanceof HtbApiError) || err.status !== 422) return false;
   const body = err.body as { errors?: { email?: string[] } } | undefined;
@@ -149,12 +159,17 @@ export async function provision(
   const user = await findUserByEmail(api, email);
 
   if (user) {
-    const { data } = await api<{ data: { expires_at: string; user: HtbUser } }>(
-      "POST",
-      `/licenses/${cfg.licenseId}/users`,
-      { body: { user: user.id, expires_at: cfg.days } },
-    );
-    return { action: "license_assigned", userId: user.id, expiresAt: data.expires_at };
+    try {
+      const { data } = await api<{ data: { expires_at: string; user: HtbUser } }>(
+        "POST",
+        `/licenses/${cfg.licenseId}/users`,
+        { body: { user: user.id, expires_at: cfg.days } },
+      );
+      return { action: "license_assigned", userId: user.id, expiresAt: data.expires_at };
+    } catch (err) {
+      if (isLicenseAlreadyAssigned(err)) return { action: "license_active", userId: user.id };
+      throw err;
+    }
   }
 
   // Resend: delete the unused code first, otherwise creating a new one fails with 422.

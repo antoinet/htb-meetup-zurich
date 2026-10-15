@@ -9,6 +9,7 @@ the response says what happened:
 | Who | What happens | `status` |
 |---|---|---|
 | Existing member of the HTB Enterprise org | The Meetup Lab license is assigned and expires after `HTB_DURATION_DAYS` | `license_assigned` |
+| Existing member who already has the license | Nothing changes. The page says the lab is already active | `license_active` |
 | Unknown email | A registration code (invitation email) is sent that already carries the license, with the same duration | `invitation_sent` |
 | Unknown email that already has an unused invitation | Nothing is sent. The page offers **Send a new invitation** | `invitation_pending` |
 | Same, with `"resend": true` | The unused code is deleted and a new one is created, which sends a fresh email | `invitation_sent` |

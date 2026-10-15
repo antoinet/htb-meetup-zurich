@@ -4,7 +4,8 @@ import { provision, type ProvisionResult } from "../../lib/htb.mts";
 
 /**
  * POST /api/onboard   { email, code, resend?, website }
- *   -> { ok, status, message, ... }   status: license_assigned | invitation_sent | invitation_pending
+ *   -> { ok, status, message }
+ *      status: license_assigned | license_active | invitation_sent | invitation_pending
  *
  * Called by the onboarding form on https://htbzh.ch/onboarding.html.
  * The meetup code is checked BEFORE anything is looked up on HTB, so without the code
@@ -43,6 +44,11 @@ function describe(result: ProvisionResult): string {
         `${until ? ` until ${until}` : ""}. Sign in at ${HTB_URL} to get started.`
       );
     }
+    case "license_active":
+      return (
+        "Good news: the Meetup Lab is already active on your Hack The Box Enterprise account. " +
+        `Sign in at ${HTB_URL} to get started.`
+      );
     case "invitation_sent":
       return result.replacedCodeId
         ? "A new invitation is on its way. The link in any earlier invitation no longer works, " +
