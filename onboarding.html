@@ -62,9 +62,24 @@
       var submitBtn = form.querySelector("button[type=submit]");
       var resendBtn = document.getElementById("resend");
 
+      var HTB_URL = "https://enterprise.hackthebox.com";
+
+      // Built with DOM nodes, not innerHTML: only this exact URL becomes a link.
       function show(kind, text) {
         status.className = "form-status " + kind;
-        status.textContent = text;
+        status.textContent = "";
+        var parts = String(text || "").split(HTB_URL);
+        parts.forEach(function (part, i) {
+          if (i > 0) {
+            var a = document.createElement("a");
+            a.href = HTB_URL;
+            a.target = "_blank";
+            a.rel = "noopener";
+            a.textContent = "enterprise.hackthebox.com";
+            status.appendChild(a);
+          }
+          if (part) status.appendChild(document.createTextNode(part)); // keep :empty working
+        });
       }
 
       function setBusy(busy) {
