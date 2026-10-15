@@ -22,12 +22,107 @@
 
   <div class="container">
     <h2>Onboarding</h2>
-    <iframe data-tally-src="https://tally.so/embed/Zj5d6e?hideTitle=1&transparentBackground=1&dynamicHeight=1" loading="lazy" width="100%" height="1016" frameborder="0" marginheight="0" marginwidth="0" title="Hack The Box Meetup Zurich"></iframe>
-    <script>var d=document,w="https://tally.so/widgets/embed.js",v=function(){"undefined"!=typeof Tally?Tally.loadEmbeds():d.querySelectorAll("iframe[data-tally-src]:not([src])").forEach((function(e){e.src=e.dataset.tallySrc}))};if("undefined"!=typeof Tally)v();else if(d.querySelector('script[src="'+w+'"]')==null){var s=d.createElement("script");s.src=w,s.onload=v,s.onerror=v,d.body.appendChild(s);}</script>
+    <p>Welcome to the Hack The Box Meetup Zurich! Enter your email address and the meetup code from
+      the intro slide to get access to tonight's lab on the Hack The Box Enterprise platform.
+      This works whether this is your first meetup or not.</p>
+
+    <form class="onboarding-form" id="onboarding-form" data-endpoint="https://htbzh.netlify.app/api/onboard" novalidate>
+      <div class="form-field">
+        <label for="email">Email address</label>
+        <input type="email" id="email" name="email" autocomplete="email" required>
+        <span class="hint">If you've joined before, use the email address of your existing Hack The Box Enterprise account.</span>
+      </div>
+
+      <div class="form-field">
+        <label for="code">Meetup code</label>
+        <input type="text" id="code" name="code" autocomplete="off" autocapitalize="off" spellcheck="false" required>
+        <span class="hint">Shown at the start of the meetup.</span>
+      </div>
+
+      <div class="hp" aria-hidden="true">
+        <label for="website">Website</label>
+        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+      </div>
+
+      <button type="submit" class="btn">Get access</button>
+      <div class="form-status" id="form-status" role="status" aria-live="polite"></div>
+    </form>
+
+    <h3>What happens next</h3>
+    <ol class="steps">
+      <li><b>First time here?</b> You'll get an invitation email from Hack The Box. Follow the link to
+        create your account. The Meetup Lab is included.</li>
+      <li><b>Joined before?</b> Sign in to <a href="https://enterprise.hackthebox.com" target="_blank" rel="noopener">enterprise.hackthebox.com</a>
+        with your existing account. The Meetup Lab has been added to it.</li>
+      <li>Open the Meetup Lab. It has the violet icon in the left navigation pane.
+        <img src="https://storage.tally.so/3c794ac7-76cc-438e-81c9-5c7a7bcc50e3/meetup_lab.png"
+             alt="Left navigation pane of the Hack The Box Enterprise platform, with the violet Meetup Lab icon" loading="lazy">
+      </li>
+    </ol>
+    <p>Access lasts a few days after the meetup. Something not working? Grab the organiser.</p>
   </div>
 
   <footer>
     ✨ Vibe coded with zero shame ✨
   </footer>
+
+  <script>
+    (function () {
+      var form = document.getElementById("onboarding-form");
+      var status = document.getElementById("form-status");
+      var button = form.querySelector("button");
+
+      function show(kind, text) {
+        status.className = "form-status " + kind;
+        status.textContent = text;
+      }
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var email = form.email.value.trim();
+        var code = form.code.value.trim();
+
+        if (!form.email.checkValidity() || !email) {
+          show("error", "Please enter a valid email address.");
+          form.email.focus();
+          return;
+        }
+        if (!code) {
+          show("error", "Please enter the meetup code.");
+          form.code.focus();
+          return;
+        }
+
+        button.disabled = true;
+        button.textContent = "Sending…";
+        show("", "");
+
+        fetch(form.dataset.endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: email, code: code, website: form.website.value })
+        })
+          .then(function (res) {
+            if (res.status === 429) {
+              return { ok: false, message: "Too many attempts. Please wait a minute and try again." };
+            }
+            return res.json().catch(function () {
+              return { ok: false, message: "Unexpected response. Please ask the organiser for help." };
+            });
+          })
+          .then(function (data) {
+            show(data.ok ? "ok" : "error", data.message);
+            if (data.ok) form.reset();
+          })
+          .catch(function () {
+            show("error", "Couldn't reach the server. Check your connection and try again.");
+          })
+          .finally(function () {
+            button.disabled = false;
+            button.textContent = "Get access";
+          });
+      });
+    })();
+  </script>
 </body>
 </html>
